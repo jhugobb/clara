@@ -1,0 +1,32 @@
+instancesDirectory = instances;
+fileNamePrefix = project_data;
+fileNameExtension = dat;
+numInstances = 1;
+
+nServices = 10;
+nBuses = 40;
+nDrivers = 30; 
+
+minStartingTimeService = 120;
+maxStartingTimeService = 1380;
+minDurationTimeService = 10;
+maxDurationTimeService = 60;
+minDistanceService = 20;
+maxDistanceService = 80;
+minNPassengersService = 8;
+maxNPassengersService = 90;
+
+minCapacityBus = 30;
+maxCapacityBus = 120;
+minCostBusEurosMin = 5.2;
+maxCostBusEurosMin = 10;
+minCostBusEurosKm = 3;
+maxCostBusEurosKm = 8.1;
+
+minMaxMinutesDriver = 120;
+maxMaxMinutesDriver = 480;
+
+maxBuses = 20;
+CBM = 1;
+CEM = 2;
+BM = 240;
