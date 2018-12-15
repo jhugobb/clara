@@ -1,0 +1,19 @@
+nServices=3;
+nBuses=9;
+nDrivers=5;
+
+startingTimeService=[929 162 1084];
+durationTimeService=[19 44 42];
+distanceService=[67.87 62.27 33.26];
+nPassengersService=[50 78 52];
+
+capacityBus=[98 99 92 58 47 83 109 45 98];
+costBusEurosMin=[6.46 9.03 8.73 9.31 8.92 7.51 5.27 5.22 6.78];
+costBusEurosKm=[5.43 5.7 5.27 5.13 5.93 4.47 4.37 3.64 3.71];
+
+maxMinutesDriver=[45 25 39 13 48];
+
+maxBuses=2;
+baseMinutes=240;
+CBM=1;
+CEM=2;

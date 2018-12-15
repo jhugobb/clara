@@ -39,7 +39,7 @@ class validateConfig(object):
             raise Exception('nDrivers(%s) has to be a positive integer value.' % str(nDrivers))
 
         minStartingTimeService = data.minStartingTimeService
-        if(not isinstance(minStartingTimeService, (int)) or (minStartingTimeService <= 0)):
+        if(not isinstance(minStartingTimeService, (int)) or (minStartingTimeService < 0)):
             raise Exception('minStartingTimeService(%s) has to be a positive integer value.' % str(minStartingTimeService))
 
         maxStartingTimeService = data.maxStartingTimeService
@@ -47,12 +47,12 @@ class validateConfig(object):
             raise Exception('maxStartingTimeService(%s) has to be a positive integer value.' % str(maxStartingTimeService))
 
         minDistanceService = data.minDistanceService
-        if(not isinstance(minDistanceService, (int)) or (minDistanceService <= 0)):
-            raise Exception('minDistanceService(%s) has to be a positive integer value.' % str(minDistanceService))
+        if(not isinstance(minDistanceService, (int, float)) or (minDistanceService <= 0)):
+            raise Exception('minDistanceService(%s) has to be a positive float value.' % str(minDistanceService))
 
         maxDistanceService = data.maxDistanceService
-        if(not isinstance(maxDistanceService, (int)) or (maxDistanceService <= 0)):
-            raise Exception('maxDistanceService(%s) has to be a positive integer value.' % str(maxDistanceService))
+        if(not isinstance(maxDistanceService, (int, float)) or (maxDistanceService <= 0)):
+            raise Exception('maxDistanceService(%s) has to be a positive float value.' % str(maxDistanceService))
 
         minNPassengersService = data.minNPassengersService
         if(not isinstance(minNPassengersService, (int)) or (minNPassengersService <= 0)):
@@ -99,13 +99,13 @@ class validateConfig(object):
             raise Exception('maxBuses(%s) has to be a positive integer value.' % str(maxBuses))
         
         CBM = data.CBM
-        if(not isinstance(CBM, (int)) or (CBM <= 0)):
-            raise Exception('CBM(%s) has to be a positive integer value.' % str(CBM))
+        if(not isinstance(CBM, (int, float)) or (CBM <= 0)):
+            raise Exception('CBM(%s) has to be a positive float value.' % str(CBM))
         
         CEM = data.CEM
-        if(not isinstance(CEM, (int)) or (CEM <= 0)):
-            raise Exception('CEM(%s) has to be a positive integer value.' % str(CEM))
+        if(not isinstance(CEM, (int, float)) or (CEM <= 0)):
+            raise Exception('CEM(%s) has to be a positive float value.' % str(CEM))
         
         BM = data.BM
-        if(not isinstance(BM, (int)) or (BM <= 0)):
-            raise Exception('BM(%s) has to be a positive integer value.' % str(BM))
+        if(not isinstance(BM, (int, float)) or (BM <= 0)):
+            raise Exception('BM(%s) has to be a positive float value.' % str(BM))

@@ -13,15 +13,13 @@ def run():
     
     print ('Reading Config file %s...' % args.configFile)
     config = datParser.parse(args.configFile)
-    for parameter in config.__dict__:
-        print(parameter)
-
+    
     validateConfig.validate(config)
-    '''
+    
     print ('Creating Instances...')
     instGen = instanceGenerator(config)
     instGen.generate()
-    '''
+    
     print ('Done')
 
     return(0)

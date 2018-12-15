@@ -10,18 +10,35 @@ class instanceGenerator(object):
         fileNamePrefix = self.config.fileNamePrefix
         fileNameExtension = self.config.fileNameExtension
         numInstances = self.config.numInstances
+
+        nServices = self.config.nServices
+        nBuses = self.config.nBuses
+        nDrivers = self.config.nDrivers  
         
-        numCPUs = self.config.numCPUs
-        minNumCoresPerCPU = self.config.minNumCoresPerCPU
-        maxNumCoresPerCPU = self.config.maxNumCoresPerCPU
-        minCapacityPerCore = self.config.minCapacityPerCore
-        maxCapacityPerCore = self.config.maxCapacityPerCore
-        
-        numTasks = self.config.numTasks
-        minNumThreadsPerTask = self.config.minNumThreadsPerTask
-        maxNumThreadsPerTask = self.config.maxNumThreadsPerTask
-        minResourcesPerThread = self.config.minResourcesPerThread
-        maxResourcesPerThread = self.config.maxResourcesPerThread
+        minStartingTimeService = self.config.minStartingTimeService
+        maxStartingTimeService = self.config.maxStartingTimeService
+        minDurationTimeService = self.config.minDurationTimeService
+        maxDurationTimeService = self.config.maxDurationTimeService
+        minDistanceService = self.config.minDistanceService
+        maxDistanceService = self.config.maxDistanceService
+        minNPassengersService = self.config.minNPassengersService
+        maxNPassengersService = self.config.maxNPassengersService
+
+        minCapacityBus = self.config.minCapacityBus
+        maxCapacityBus = self.config.maxCapacityBus
+        minCostBusEurosMin = self.config.minCostBusEurosMin
+        maxCostBusEurosMin = self.config.maxCostBusEurosMin
+        minCostBusEurosKm = self.config.minCostBusEurosKm
+        maxCostBusEurosKm = self.config.maxCostBusEurosKm
+
+        minMaxMinutesDriver = self.config.minMaxMinutesDriver
+        maxMaxMinutesDriver = self.config.maxMaxMinutesDriver
+
+        maxBuses = self.config.maxBuses
+        CBM = self.config.CBM
+        CEM = self.config.CEM
+        BM = self.config.BM
+
 
         if(not os.path.isdir(instancesDirectory)):
             raise Exception('Directory(%s) does not exist' % instancesDirectory)
@@ -30,68 +47,63 @@ class instanceGenerator(object):
             instancePath = os.path.join(instancesDirectory, '%s_%d.%s' % (fileNamePrefix, i, fileNameExtension))
             fInstance = open(instancePath, 'w')
 
-            numCores = 0
-            firstCoreIdPerCPU = []
-            numCoresPerCPU = []
-            coreCapacityPerCPU = []
-            for c in range(0, numCPUs):
-                numCPUCores = random.randint(minNumCoresPerCPU, maxNumCoresPerCPU)
-                coreCapacity = random.uniform(minCapacityPerCore, maxCapacityPerCore)
-                firstCoreId = numCores
-                firstCoreIdPerCPU.append(firstCoreId)
-                numCoresPerCPU.append(numCPUCores)
-                coreCapacityPerCPU.append(coreCapacity)
-                numCores += numCPUCores
+            st_s = [] #starting time of each service
+            duration_s = [] # duration " " "
+            distance_s = [] # distance " " "
+            nPassengers_s = [] # number of passengers " " "
+            for s in range(0, nServices):
+                startingTimeService = random.randint(minStartingTimeService, maxStartingTimeService)
+                durationTimeService = random.randint(minDurationTimeService, maxDurationTimeService)
+                distanceService     = round(random.uniform(minDistanceService, maxDistanceService), 2)
+                nPassengersService  = random.randint(minNPassengersService, maxNPassengersService)
+                st_s.append(startingTimeService)
+                duration_s.append(durationTimeService)
+                distance_s.append(distanceService)
+                nPassengers_s.append(nPassengersService)
             
-            numThreads = 0
-            firstThreadIdPerTask = []
-            numThreadsPerTask = []
-            resourcesPerThread = []
-            for t in range(0, numTasks):
-                numTaskThreads = random.randint(minNumThreadsPerTask, maxNumThreadsPerTask)
-                firstThreadId = numThreads
-                firstThreadIdPerTask.append(firstThreadId)
-                numThreadsPerTask.append(numTaskThreads)
-                for h in range(0, numTaskThreads):
-                    resources = random.uniform(minResourcesPerThread, maxResourcesPerThread)
-                    resourcesPerThread.append(resources)
-                numThreads += numTaskThreads
+            capacity_b = []
+            costMin_b = []
+            costKm_b = []
+            for b in range(0, nBuses):
+                capacityBus = random.randint(minCapacityBus, maxCapacityBus)
+                costMinBus  = round(random.uniform(minCostBusEurosMin, maxCostBusEurosMin), 2)
+                costKmBus   = round(random.uniform(minCostBusEurosKm, maxCostBusEurosKm), 2)
+                capacity_b.append(capacityBus)
+                costMin_b.append(costMinBus)
+                costKm_b.append(costKmBus)
             
-            fInstance.write('nTasks=%d;\n' % numTasks)
-            fInstance.write('nThreads=%d;\n' % numThreads)
-            fInstance.write('nCPUs=%d;\n' % numCPUs)
-            fInstance.write('nCores=%d;\n' % numCores)
+            maxMin_d = []
+            for d in range(0, nDrivers):
+                maxMinDriver = random.randint(minMaxMinutesDriver, maxMaxMinutesDriver)
+                maxMin_d.append(maxMinDriver)
+
+            fInstance.write('nServices=%d;\n' % nServices)
+            fInstance.write('nBuses=%d;\n' % nBuses)
+            fInstance.write('nDrivers=%d;\n' % nDrivers)
+
+            fInstance.write('\n')
             
             # translate vector of floats into vector of strings and concatenate that strings separating them by a single space character
-            fInstance.write('rh=[%s];\n' % (' '.join(map(str, resourcesPerThread))))
-            fInstance.write('rc=[%s];\n' % (' '.join(map(str, coreCapacityPerCPU))))
+            fInstance.write('startingTimeService=[%s];\n' % (' '.join(map(str, st_s))))
+            fInstance.write('durationTimeService=[%s];\n' % (' '.join(map(str, duration_s))))
+            fInstance.write('distanceService=[%s];\n' % (' '.join(map(str, distance_s))))
+            fInstance.write('nPassengersService=[%s];\n' % (' '.join(map(str, nPassengers_s))))
+
+            fInstance.write('\n')
+
+            fInstance.write('capacityBus=[%s];\n' % (' '.join(map(str, capacity_b))))
+            fInstance.write('costBusEurosMin=[%s];\n' % (' '.join(map(str, costMin_b))))
+            fInstance.write('costBusEurosKm=[%s];\n' % (' '.join(map(str, costKm_b))))
             
-            fInstance.write('CK=[\n')
-            for c in range(0, numCPUs):
-                cores = [0] * numCores # create a vector of 0's with numCores elements
-                firstCoreId = firstCoreIdPerCPU[c]
-                numCPUCores = numCoresPerCPU[c]
-                
-                # fill appropriate positions with 1's
-                for k in range(firstCoreId, firstCoreId + numCPUCores):
-                    cores[k] = 1
-                
-                # translate vector of integers into vector of strings and concatenate that strings separating them by a single space character
-                fInstance.write('\t[%s]\n' % (' '.join(map(str, cores))))
-            fInstance.write('];\n')
+            fInstance.write('\n')
+
+            fInstance.write('maxMinutesDriver=[%s];\n' % (' '.join(map(str, maxMin_d))))
+
+            fInstance.write('\n')
             
-            fInstance.write('TH=[\n')
-            for t in range(0, numTasks):
-                threads = [0] * numThreads # create a vector of 0's with numThreads elements
-                firstThreadId = firstThreadIdPerTask[t]
-                numTaskThreads = numThreadsPerTask[t]
-                
-                # fill appropriate positions with 1's
-                for h in range(firstThreadId, firstThreadId + numTaskThreads):
-                    threads[h] = 1
-                
-                # translate vector of integers into vector of strings and concatenate that strings separating them by a single space character
-                fInstance.write('\t[%s]\n' % (' '.join(map(str, threads))))
-            fInstance.write('];\n')
+            fInstance.write('maxBuses=%s;\n' % maxBuses)
+            fInstance.write('baseMinutes=%s;\n' % BM)
+            fInstance.write('CBM=%s;\n' % CBM)
+            fInstance.write('CEM=%s;\n' % CEM)
 
             fInstance.close()

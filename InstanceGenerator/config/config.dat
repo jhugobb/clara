@@ -3,30 +3,30 @@ fileNamePrefix = project_data;
 fileNameExtension = dat;
 numInstances = 1;
 
-nServices = 10;
-nBuses = 40;
-nDrivers = 30; 
+nServices = 400;
+nBuses = 410;
+nDrivers = 370;
 
-minStartingTimeService = 120;
-maxStartingTimeService = 1380;
-minDurationTimeService = 10;
-maxDurationTimeService = 60;
-minDistanceService = 20;
-maxDistanceService = 80;
-minNPassengersService = 8;
-maxNPassengersService = 90;
+minStartingTimeService = 0;
+maxStartingTimeService = 1440;
+minDurationTimeService = 45;
+maxDurationTimeService = 360;
+minDistanceService = 12;
+maxDistanceService = 600;
+minNPassengersService = 50;
+maxNPassengersService = 150;
 
-minCapacityBus = 30;
-maxCapacityBus = 120;
-minCostBusEurosMin = 5.2;
-maxCostBusEurosMin = 10;
-minCostBusEurosKm = 3;
-maxCostBusEurosKm = 8.1;
+minCapacityBus = 40;
+maxCapacityBus = 180;
+minCostBusEurosMin = 0.5;
+maxCostBusEurosMin = 2;
+minCostBusEurosKm = 2.12;
+maxCostBusEurosKm = 4;
 
-minMaxMinutesDriver = 120;
+minMaxMinutesDriver = 60;
 maxMaxMinutesDriver = 480;
 
-maxBuses = 20;
-CBM = 1;
-CEM = 2;
-BM = 240;
+maxBuses = 341;
+CBM = 10;
+CEM = 15;
+BM = 360;
