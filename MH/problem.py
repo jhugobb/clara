@@ -7,48 +7,47 @@ class Problem(object):
         
         self.inputData = inputData
         
-        nBuses = self.inputData.nBuses
-        nDrivers = self.inputData.nDrivers
-        nServices = self.inputData.nServices
+        self.nBuses = self.inputData.nBuses
+        self.nDrivers = self.inputData.nDrivers
+        self.nServices = self.inputData.nServices
 
-        startingTimeService = self.inputData.startingTimeService
-        durationTimeService = self.inputData.durationTimeService
-        distanceService = self.inputData.distanceService
-        nPassengersService = self.inputData.nPassengersService
+        self.startingTimeService = self.inputData.startingTimeService
+        self.durationTimeService = self.inputData.durationTimeService
+        self.distanceService = self.inputData.distanceService
+        self.nPassengersService = self.inputData.nPassengersService
 
-        capacityBus = self.inputData.capacityBus
-        costBusEurosMin = self.inputData.costBusEurosMin
-        costBusEurosKm = self.inputData.costBusEurosKm
+        self.capacityBus = self.inputData.capacityBus
+        self.costBusEurosMin = self.inputData.costBusEurosMin
+        self.costBusEurosKm = self.inputData.costBusEurosKm
 
-        maxMinutesDriver = self.inputData.maxMinutesDriver
+        self.maxMinutesDriver = self.inputData.maxMinutesDriver
 
-        maxBuses = self.inputData.maxBuses
-        BM = self.inputData.baseMinutes
-        CBM = self.inputData.CBM
-        CEM = self.inputData.CEM
-
-        self.services = set()
-        for sId in range(0, nServices):             
-            st = startingTimeService[sId]
-            t = durationTimeService[sId]
-            d = distanceService[sId]
-            nP = nPassengersService[sId]
+        self.maxBuses = self.inputData.maxBuses
+        self.BM = self.inputData.baseMinutes
+        self.CBM = self.inputData.CBM
+        self.CEM = self.inputData.CEM
+        self.services = list()
+        for sId in range(0, self.nServices):     
+            st = self.startingTimeService[sId]
+            t = self.durationTimeService[sId]
+            d = self.distanceService[sId]
+            nP = self.nPassengersService[sId]
             service = Service(sId, st, t, d, nP)
-            self.services.add(service)            
+            self.services.append(service)            
 
-        self.buses = set()
-        for bId in range(0, nBuses):
-            capacity = capacityBus[bId]
-            costMin = costBusEurosMin[bId]
-            costKm = costBusEurosKm[bId]
+        self.buses = list()
+        for bId in range(0, self.nBuses):
+            capacity = self.capacityBus[bId]
+            costMin = self.costBusEurosMin[bId]
+            costKm = self.costBusEurosKm[bId]
             bus = Bus(bId, capacity, costMin, costKm)
-            self.buses.add(bus)
+            self.buses.append(bus)
 
-        self.drivers = set()
-        for dId in range(0, nDrivers):
-            maxM = maxMinutesDriver[dId]
+        self.drivers = list()
+        for dId in range(0, self.nDrivers):
+            maxM = self.maxMinutesDriver[dId]
             driver = Driver(dId, maxM)
-            self.drivers.add(driver)
+            self.drivers.append(driver)
 
     def checkInstance(self):
         # check max capacity of a bus 
