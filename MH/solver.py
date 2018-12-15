@@ -96,19 +96,21 @@ class Solver(object):
         cost = float('infinity')
         evaluatedCandidates = 0
         for i in range(0, problem.nBuses):
+            isCompatible = True
             b = problem.buses[i]
             if b.capacity < service.nPassengers:
-                cost = float('infinity')
+                isCompatible = False
             elif b not in busesUtilised and nBusesUtilised >= problem.maxBuses:
-                cost = float('infinity')
-            elif len(b.services) != 0:
+                isCompatible = False
+            else:
                 for s_2 in b.services:
                     if s_2.startingTime + s_2.duration > service.startingTime:
-                        cost = float('infinity')
-                    else: 
-                        cost = b.costMin * service.duration + b.costKm * service.distance
-            else:
+                        isCompatible = False
+                        break
+            if isCompatible:
                 cost = b.costMin * service.duration + b.costKm * service.distance
+            else:
+                cost = float('infinity')
 
             if cost < maxCost:
                 maxCost = cost

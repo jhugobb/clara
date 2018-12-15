@@ -1,6 +1,6 @@
 # --- Common specific parameters ------------------------------------------------------------------------------
-inputDataFile        = data/test.dat;        # Input DAT file
-solutionFile         = solutions/test.sol; # Output DAT file (solution)
+inputDataFile        = data/project_data_7.dat;        # Input DAT file
+solutionFile         = solutions/test_7.sol; # Output DAT file (solution)
 solver               = GRASP;                 # Supported solvers: Greedy / GRASP
 maxExecTime          = 600;                   # Maximum execution time in seconds
 
