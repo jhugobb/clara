@@ -1,6 +1,7 @@
 import random, time
 from logger import Logger
 from solution import Solution
+from localsearch import LocalSearch
 import objects
 
 class Solver(object):
@@ -32,8 +33,8 @@ class Solver(object):
             solution, elapsedEvalTime, evaluatedCandidates = self.GRASPConstruction(config, problem)
         self.writeLogLine(solution.cost, 1)
 
-        #localSearch = LocalSearch(config)
-        #solution = localSearch.run(solution)
+        localSearch = LocalSearch(config)
+        solution = localSearch.search(solution, self, problem)
 
         self.writeLogLine(solution.cost, 1)
         
@@ -47,7 +48,7 @@ class Solver(object):
         print ('  Total Eval. Time     ', elapsedEvalTime, 's')
         print ('  Avg. Time / Candidate', avg_evalTimePerCandidate, 'ms')
         
-        #localSearch.printPerformance()
+        localSearch.printPerformance()
         
         return(solution)
 

@@ -36,10 +36,41 @@ class Solution(Problem):
     def assignBus(self, bus, service):
         self.serviceIdtoBus[service.serviceId] = bus.busId
         bus.services.add(service)
+        service.bus = bus
     
     def assignDriver(self, driver, service):
-        self.serviceIdtoDriver[service.serviceId] = driver.driverId 
+        self.serviceIdtoDriver[service.serviceId] = driver.driverId
+        driver.services.add(service)
         driver.timeWorked += service.duration
+        service.driver = driver
+
+    def createNeighborBus(self, bus, service, bus2, service2):
+        bus.services.remove(service)
+        bus2.services.remove(service2)
+        bus.services.add(service2)
+        bus2.services.add(service)
+
+        self.serviceIdtoBus.pop(service.serviceId, None)
+        self.serviceIdtoBus[service.serviceId] = bus2.busId
+        self.serviceIdtoBus.pop(service2.serviceId, None)
+        self.serviceIdtoBus[service2.serviceId] = bus.busId
+
+    def createNeighborDriver(self, driver, service, driver2, service2):
+        driver.services.remove(service)
+        driver.timeWorked -= service.duration
+        driver2.services.remove(service2)
+        driver2.timeWorked -= service2.duration
+        driver.services.add(service2)
+        driver.timeWorked += service2.duration
+        driver2.services.add(service)
+        driver2.timeWorked += service.duration
+
+        self.serviceIdtoDriver.pop(service.serviceId, None)
+        self.serviceIdtoDriver[service.serviceId] = driver2.driverId
+        self.serviceIdtoDriver.pop(service2.serviceId, None)
+        self.serviceIdtoDriver[service2.serviceId] = driver.driverId
+        
+
     
     def __str__(self):  # toString equivalent
         nServices = self.inputData.nServices

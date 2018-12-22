@@ -53,18 +53,23 @@ class ValidateConfig(object):
         solver = data.solver
         if(solver == 'Greedy'):
             # Validate that mandatory input parameters for Greedy solver were found
-            for paramName in ['localSearch']:
+            for paramName in ['localSearchBuses', 'localSearchDrivers']:
                 if(not paramName in data.__dict__):
                     raise Exception('Parameter/Set(%s) not contained in Configuration. Required by Greedy solver.' % str(paramName))
 
-            # Validate localSearch
-            localSearch = data.localSearch
-            if(not isinstance(localSearch, (bool)) or (localSearch not in [True, False])):
-                raise Exception('localSearch(%s) has to be a boolean value.' % str(localSearch))
+            # Validate localSearchBuses
+            localSearchBuses = data.localSearchBuses
+            if(not isinstance(localSearchBuses, (bool)) or (localSearchBuses not in [True, False])):
+                raise Exception('buses(%s) has to be a boolean value.' % str(localSearchBuses))
+            
+            # Validate localSearchDrivers
+            localSearchDrivers = data.localSearchDrivers
+            if(not isinstance(localSearchDrivers, (bool)) or (localSearchDrivers not in [True, False])):
+                raise Exception('drivers(%s) has to be a boolean value.' % str(localSearchDrivers))
 
         elif(solver == 'GRASP'):
             # Validate that mandatory input parameters for GRASP solver were found
-            for paramName in ['maxExecTime', 'alpha', 'localSearch']:
+            for paramName in ['maxExecTime', 'alpha', 'localSearchBuses', 'localSearchDrivers']:
                 if(not paramName in data.__dict__):
                     raise Exception('Parameter/Set(%s) not contained in Configuration. Required by GRASP solver.' % str(paramName))
 
@@ -78,15 +83,20 @@ class ValidateConfig(object):
             if(not isinstance(alpha, (int, float)) or (alpha < 0) or (alpha > 1)):
                 raise Exception('alpha(%s) has to be a float value in range [0, 1].' % str(alpha))
 
-            # Validate localSearch
-            localSearch = data.localSearch
-            if(not isinstance(localSearch, (bool)) or (localSearch not in [True, False])):
-                raise Exception('localSearch(%s) has to be a boolean value.' % str(localSearch))
+            # Validate localSearchBuses
+            localSearchBuses = data.localSearchBuses
+            if(not isinstance(localSearchBuses, (bool)) or (localSearchBuses not in [True, False])):
+                raise Exception('buses(%s) has to be a boolean value.' % str(localSearchBuses))
+
+            # Validate localSearchDrivers
+            localSearchDrivers = data.localSearchDrivers
+            if(not isinstance(localSearchDrivers, (bool)) or (localSearchDrivers not in [True, False])):
+                raise Exception('drivers(%s) has to be a boolean value.' % str(localSearchDrivers))
 
         else:
             raise Exception('Unsupported solver specified(%s) in Configuration. Supported solvers are: Greedy, GRASP and BRKGA.' % str(solver))
         
-        if(data.localSearch):
+        if(data.localSearchBuses or data.localSearchDrivers):
             # Validate that mandatory input parameters for local search were found
             for paramName in ['neighborhoodStrategy', 'policy']:
                 if(not paramName in data.__dict__):
