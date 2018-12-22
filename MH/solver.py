@@ -1,4 +1,4 @@
-import time
+import random, time
 from logger import Logger
 from solution import Solution
 import objects
@@ -26,7 +26,10 @@ class Solver(object):
         self.startTimeMeasure()
         self.writeLogLine(float('infinity'), 0)
 
-        solution, elapsedEvalTime, evaluatedCandidates = self.greedyConstruction(config, problem)
+        if config.solver == 'Greedy': 
+            solution, elapsedEvalTime, evaluatedCandidates = self.greedyConstruction(config, problem)
+        elif config.solver == 'GRASP':
+            solution, elapsedEvalTime, evaluatedCandidates = self.GRASPConstruction(config, problem)
         self.writeLogLine(solution.cost, 1)
 
         #localSearch = LocalSearch(config)
@@ -79,6 +82,49 @@ class Solver(object):
             solution.assignBus(busUtilised, s)
 
             driverUtilised, evalc = self.getBestDriver(s, problem)
+            evaluatedCandidates += evalc
+
+            if driverUtilised is None:
+                solution.makeInfeasible()
+                break
+            
+            solution.assignDriver(driverUtilised, s)  
+
+        solution.cost = self.calculateFinalCost(problem)          
+        elapsedEvalTime = time.time() - elapsedEvalTime
+        return(solution, elapsedEvalTime, evaluatedCandidates)
+
+    def GRASPConstruction(self, config, problem):
+        # get an empty solution for the problem
+        solution = Solution.createEmptySolution(config, problem)
+        
+        # get tasks and sort them by their total required resources in descending order
+        services = problem.services
+        sortedServices = sorted(services, key=lambda service: service.startingTime, reverse=False)
+        
+        elapsedEvalTime = time.time()
+        evaluatedCandidates = 0
+        
+        # for each task taken in sorted order
+        nBusesUtilised = 0
+        busesUtilised = set()
+        alpha = config.alpha
+        for s in sortedServices:
+
+            costB, evalc = self.getBestBusSet(s, busesUtilised, problem, nBusesUtilised)
+            evaluatedCandidates += evalc
+
+            busUtilised = self.chooseBus(costB, alpha)
+            
+            busesUtilised.add(busUtilised)
+            nBusesUtilised+=1
+
+            solution.assignBus(busUtilised, s)
+
+            costD, evalc = self.getBestDriverSet(s, problem)
+
+            driverUtilised = self.chooseDriver(costD, alpha)
+            evaluatedCandidates+=evalc
 
             if driverUtilised is None:
                 solution.makeInfeasible()
@@ -136,6 +182,91 @@ class Solver(object):
                 driverUtilised = d
             evaluatedCandidates+=1
         return (driverUtilised, evaluatedCandidates)
+
+    def getBestBusSet(self, service, busesUtilised, problem, nBusesUtilised):
+        busSet = list()
+        cost = float('infinity')
+        evaluatedCandidates = 0
+        for i in range(0, problem.nBuses):
+            isCompatible = True
+            b = problem.buses[i]
+            if b.capacity < service.nPassengers:
+                isCompatible = False
+            elif b not in busesUtilised and nBusesUtilised >= problem.maxBuses:
+                isCompatible = False
+            else:
+                for s_2 in b.services:
+                    if s_2.startingTime + s_2.duration > service.startingTime:
+                        isCompatible = False
+                        break
+            if isCompatible:
+                cost = b.costMin * service.duration + b.costKm * service.distance
+            else:
+                cost = float('infinity')
+
+            b.costCurrService = cost
+            if isCompatible:
+                busSet.append(b)
+            evaluatedCandidates+=1
+        sortedBuses = sorted(busSet, key=lambda bus: bus.costCurrService, reverse=False)
+        return (sortedBuses, evaluatedCandidates)
+
+    def getBestDriverSet(self, service, problem):
+        driverSet = list()
+        evaluatedCandidates = 0
+        cost = float('infinity')
+        for i in range(0, problem.nDrivers):
+            d = problem.drivers[i]
+            if d.timeWorked + service.duration > d.maxMinutes:
+                cost = float('infinity')
+            elif d.timeWorked + service.duration <= problem.BM:
+                cost = problem.CBM * (d.timeWorked + service.duration)
+            else:
+                cost = problem.CBM * problem.BM + problem.CEM * (d.timeWorked + service.duration - problem.BM)
+            d.costCurrService = cost
+            if cost != float('infinity'):
+                driverSet.append(d)
+            evaluatedCandidates+=1
+        sortedDrivers = sorted(driverSet, key=lambda driver: driver.costCurrService, reverse=False)
+        return (sortedDrivers, evaluatedCandidates)
+
+    def chooseBus(self, costB, alpha):
+        if len(costB) == 0:
+            return None
+            
+        minCost = costB[0].costCurrService
+        maxCost = costB[len(costB)-1].costCurrService
+        boundaryCost = minCost + (maxCost - minCost) * alpha
+
+        maxIndex = 0
+        for b in costB:
+            if b.costCurrService > boundaryCost: break
+            maxIndex += 1
+
+        candidates = costB[0:maxIndex]
+        if len(candidates)==0:
+            return None
+        else:
+            return random.choice(candidates)
+    
+    def chooseDriver(self, costD, alpha):
+        if len(costD) == 0:
+            return None
+        
+        minCost = costD[0].costCurrService
+        maxCost = costD[len(costD)-1].costCurrService
+        boundaryCost = minCost + (maxCost - minCost) * alpha
+
+        maxIndex = 0
+        for d in costD:
+            if d.costCurrService > boundaryCost: break
+            maxIndex += 1
+
+        candidates = costD[0:maxIndex]
+        if len(candidates)==0:
+            return None
+        else:
+            return random.choice(candidates)
 
     def calculateFinalCost(self, problem):
         cost = 0

@@ -5,6 +5,7 @@ class Bus(object):
         self.costMin = costMin
         self.costKm = costKm
         self.services = set() #services that this bus is performing
+        self.costCurrService = 0
 
     def addService(self, service):
         self.services.add(service)
