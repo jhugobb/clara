@@ -24,7 +24,6 @@ class LocalSearch(object):
         while(keepIterating):
             keepIterating = False
             iterations += 1
-            
             neighbor = self.exploreNeighborhood(bestSolution, problem, solver)
             
             if neighbor is not None and (bestCost > neighbor.cost):
@@ -40,23 +39,41 @@ class LocalSearch(object):
     def exploreNeighborhood(self, solution, problem, solver):
         buses = problem.buses
         drivers = problem.drivers
+        neighbor = None
+        neighbor2 = None
         if self.nhStrategy == 'Exchange':
-            neighbor = None
-            neighbor2 = None
+
             if self.enabledBuses:
-                neighbor = self.exploreBuses(buses, solution, solver, problem)
+                neighbor = self.exploreBusesEx(buses, solution, solver, problem)
             if self.enabledDrivers:
                 if neighbor is not None:
-                    neighbor2 = self.exploreDrivers(drivers, neighbor, solver, problem)
+                    neighbor2 = self.exploreDriversEx(drivers, neighbor, solver, problem)
                 else:
-                   neighbor2 = self.exploreDrivers(drivers, solution, solver, problem)
+                   neighbor2 = self.exploreDriversEx(drivers, solution, solver, problem)
             
             if neighbor is not None and neighbor2 is None:
                 return neighbor
             else: return neighbor2
+        elif self.nhStrategy == 'Reassignment':
+            if self.enabledBuses:
+                neighbor = self.exploreBusesRe(buses, solution, solver, problem)
+            if self.enabledDrivers:
+                if neighbor is not None:
+                    neighbor2 = self.exploreDriversRe(drivers, neighbor, solver, problem)
+                else:
+                   neighbor2 = self.exploreDriversRe(drivers, solution, solver, problem)
+            
+            if neighbor is not None and neighbor2 is None:
+                return neighbor
+            else: return neighbor2
+        else:
+            raise Exception('Unsupported Neighborhood Strategy(%s)' % self.nhStrategy)
+        
+        return neighbor
+
             
 
-    def exploreBuses(self, buses, solution, solver, problem):
+    def exploreBusesEx(self, buses, solution, solver, problem):
         bestcost = 0
         bestBus1 = None
         bestBus2 = None
@@ -68,7 +85,7 @@ class LocalSearch(object):
             for service in bus.services:
                 for bus2 in uncheckedBuses:
                     if bus.busId == bus2.busId: continue
-                    service2, exchangeCost = self.tryChangeBus(bus, service, bus2)
+                    service2, exchangeGain = self.tryChangeBus(bus, service, bus2)
                     if service2 is not None:            
                         if(self.policy == 'FirstImprovement'):
                             neighbor = copy.deepcopy(solution)
@@ -76,14 +93,14 @@ class LocalSearch(object):
                             currCost = solver.calculateFinalCost(problem)
                             neighbor.cost = currCost
                             return(neighbor)
-                        elif bestcost < exchangeCost:
+                        elif bestcost < exchangeGain:
                             bestBus1 = bus
                             bestBus2 = bus2
                             bestService1 = service
                             bestService2 = service2
-                            bestcost = exchangeCost
+                            bestcost = exchangeGain
                     service2 = None
-                    exchangeCost = 0
+                    exchangeGain = 0
             uncheckedBuses.remove(bus)
         if bestBus1 is not None:
             neighbor = copy.deepcopy(solution)
@@ -93,7 +110,7 @@ class LocalSearch(object):
             return(neighbor)
         else: return None
 
-    def exploreDrivers(self, drivers, solution, solver, problem):
+    def exploreDriversEx(self, drivers, solution, solver, problem):
         bestcost = 0
         bestDriver1 = None
         bestDriver2 = None
@@ -104,7 +121,7 @@ class LocalSearch(object):
             for service in driver.services:
                 for driver2 in drivers:
                     if driver.driverId == driver2.driverId: continue
-                    service2, exchangeCost = self.tryChangeDriver(driver, service, driver2, problem)
+                    service2, exchangeGain = self.tryChangeDriver(driver, service, driver2, problem)
                     if service2 is not None:            
                         if(self.policy == 'FirstImprovement'):
                             neighbor = copy.deepcopy(solution)
@@ -112,14 +129,14 @@ class LocalSearch(object):
                             currCost = solver.calculateFinalCost(problem)
                             neighbor.cost = currCost
                             return(neighbor)
-                        elif bestcost < exchangeCost:
+                        elif bestcost < exchangeGain:
                             bestDriver1 = driver
                             bestDriver2 = driver2
                             bestService1 = service
                             bestService2 = service2
-                            bestcost = exchangeCost
+                            bestcost = exchangeGain
                     service2 = None
-                    exchangeCost = 0
+                    exchangeGain = 0
         if bestDriver1 is not None:
             neighbor = copy.deepcopy(solution)
             neighbor.createNeighborDriver(bestDriver1, bestService1, bestDriver2, bestService2)
@@ -152,7 +169,7 @@ class LocalSearch(object):
             isCompatible = True
             for s2 in bus.services:
                     if s2.serviceId == service.serviceId: continue
-                    if s2.startingTime < s.startingTime:
+                    if s2.startingTime <= s.startingTime:
                         if s2.startingTime + s2.duration > s.startingTime:
                             isCompatible = False
                             break
@@ -201,7 +218,7 @@ class LocalSearch(object):
             isCompatible = True
             for s2 in driver.services:
                     if s2.serviceId == service.serviceId: continue
-                    if s2.startingTime < s.startingTime:
+                    if s2.startingTime <= s.startingTime:
                         if s2.startingTime + s2.duration > s.startingTime:
                             isCompatible = False
                             break
@@ -226,10 +243,14 @@ class LocalSearch(object):
                 driver.timeWorked += s.duration
                 driver2.services.add(service)
                 driver2.timeWorked += service.duration
+
+                overworked = False
+                if driver.maxMinutes < driver.timeWorked or driver2.maxMinutes < driver2.timeWorked:
+                    overworked = True
                 
                 cost = driver.timeWorked * problem.CBM if driver.timeWorked <= problem.BM else problem.CBM * problem.BM + (driver.timeWorked - problem.BM) * problem.CEM
                 cost += driver2.timeWorked * problem.CBM if driver2.timeWorked <= problem.BM else problem.CBM * problem.BM + (driver2.timeWorked - problem.BM) * problem.CEM
-                if cost < bestCost:
+                if cost < bestCost and not overworked:
                     bestService = s
                     bestCost = cost
                 
@@ -241,7 +262,169 @@ class LocalSearch(object):
                 driver2.timeWorked += s.duration
                 driver.services.add(service)
                 driver.timeWorked += service.duration
+
         return bestService, initialCost - bestCost
+
+    
+    def exploreBusesRe(self, buses, solution, solver, problem):
+        bestcost = 0
+        bestBus1 = None
+        bestBus2 = None
+        bestService1 = None
+        uncheckedBuses = list(buses)
+        sortedBuses = self.getBusesByCurrCost(buses)
+        nbrOfUsedBuses = 0
+
+        for bus in sortedBuses:
+            if len(bus.services) != 0:
+                nbrOfUsedBuses += 1
+
+        for bus in sortedBuses:
+            for service in bus.services:
+                for bus2 in uncheckedBuses:
+                    if bus.busId == bus2.busId: continue
+                    isUsed = True
+                    if len(bus2.services) == 0:
+                        isUsed = False
+                    isBetter, exchangeGain = self.tryReassignBus(bus, service, bus2, isUsed, nbrOfUsedBuses, problem)
+                    if isBetter:            
+                        if(self.policy == 'FirstImprovement'):
+                            neighbor = copy.deepcopy(solution)
+                            neighbor.createNeighborBus(bus, service, bus2, None)
+                            currCost = solver.calculateFinalCost(problem)
+                            neighbor.cost = currCost
+                            return(neighbor)
+                        elif bestcost < exchangeGain:
+                            bestBus1 = bus
+                            bestBus2 = bus2
+                            bestService1 = service
+                            bestcost = exchangeGain
+                    exchangeGain = 0
+            uncheckedBuses.remove(bus)
+        if bestBus1 is not None:
+            neighbor = copy.deepcopy(solution)
+            neighbor.createNeighborBus(bestBus1, bestService1, bestBus2, None)
+            currCost = solver.calculateFinalCost(problem)
+            neighbor.cost = currCost
+            return(neighbor)
+        else: return None
+
+            
+    def exploreDriversRe(self, drivers, solution, solver, problem):
+        bestcost = 0
+        bestDriver1 = None
+        bestDriver2 = None
+        bestService1 = None
+        sortedDrivers = self.getDriversByCurrCost(drivers, problem)
+        for driver in sortedDrivers:
+            for service in driver.services:
+                for driver2 in drivers:
+                    if driver.driverId == driver2.driverId: continue
+                    isBetter, exchangeGain = self.tryReassignDriver(driver, service, driver2, problem)
+                    if isBetter:            
+                        if(self.policy == 'FirstImprovement'):
+                            neighbor = copy.deepcopy(solution)
+                            neighbor.createNeighborDriver(driver, service, driver2, None)
+                            currCost = solver.calculateFinalCost(problem)
+                            neighbor.cost = currCost
+                            return(neighbor)
+                        elif bestcost < exchangeGain:
+                            bestDriver1 = driver
+                            bestDriver2 = driver2
+                            bestService1 = service
+                            bestService2 = service2
+                            bestcost = exchangeGain
+                    service2 = None
+                    exchangeGain = 0
+        if bestDriver1 is not None:
+            neighbor = copy.deepcopy(solution)
+            neighbor.createNeighborDriver(bestDriver1, bestService1, bestDriver2, bestService2)
+            currCost = solver.calculateFinalCost(problem)
+            neighbor.cost = currCost
+            return(neighbor)
+        else: return None
+    
+
+    
+    def tryReassignBus(self, bus, service, bus2, isUsed, nbrOfUsedBuses, problem):
+        cost = None
+        bestCost = sum(map(lambda ser: bus.costMin*ser.duration+bus.costKm*ser.distance, bus.services))
+        bestCost += sum(map(lambda ser: bus2.costMin*ser.duration+bus2.costKm*ser.distance, bus2.services))
+        initialCost = bestCost
+        isCompatible = True
+        becomesEmpty = 0
+        if len(bus.services) == 1:
+            becomesEmpty = 1
+        for s2 in bus2.services:
+            if s2.startingTime <= service.startingTime:
+                if s2.startingTime + s2.duration > service.startingTime:
+                    isCompatible = False
+                    break
+            elif service.startingTime + service.duration > s2.startingTime:
+                isCompatible = False
+                break
+            if (not isUsed) and nbrOfUsedBuses + 1 - becomesEmpty > problem.maxBuses:
+                isCompatible = False
+        if isCompatible:
+            bus.services.remove(service)
+            bus2.services.add(service)
+            cost  = sum(map(lambda ser: bus.costMin*ser.duration+bus.costKm*ser.distance, bus.services))
+            cost += sum(map(lambda ser: bus2.costMin*ser.duration+bus2.costKm*ser.distance, bus2.services))
+            if cost < bestCost:
+                bestCost = cost
+            
+            bus2.services.remove(service)
+            bus.services.add(service)
+        return isCompatible and initialCost > bestCost, initialCost - bestCost
+
+    def tryReassignDriver(self, driver, service, driver2, problem):
+        if driver.timeWorked <= problem.BM:
+            initialCost =  driver.timeWorked * problem.CBM  
+        else: 
+            initialCost = problem.CBM * problem.BM + (driver.timeWorked - problem.BM) * problem.CEM
+        if driver2.timeWorked <= problem.BM:
+            initialCost += driver2.timeWorked * problem.CBM 
+        else:
+            initialCost += problem.CBM * problem.BM + (driver2.timeWorked - problem.BM) * problem.CEM
+        bestCost = initialCost
+        isCompatible = True
+
+        for s2 in driver2.services:
+            if s2.startingTime <= service.startingTime:
+                if s2.startingTime + s2.duration > service.startingTime:
+                    isCompatible = False
+                    break
+            elif service.startingTime + service.duration > s2.startingTime:
+                isCompatible = False
+                break
+
+        if isCompatible:
+            driver.services.remove(service)
+            driver.timeWorked -= service.duration
+            driver2.services.add(service)
+            driver2.timeWorked += service.duration
+
+            if driver.timeWorked <= problem.BM:
+                cost =  driver.timeWorked * problem.CBM  
+            else: 
+                cost = problem.CBM * problem.BM + (driver.timeWorked - problem.BM) * problem.CEM
+            if driver2.timeWorked <= problem.BM:
+                cost += driver2.timeWorked * problem.CBM 
+            else:
+                cost += problem.CBM * problem.BM + (driver2.timeWorked - problem.BM) * problem.CEM
+
+            overworked = False
+            if driver.maxMinutes < driver.timeWorked or driver2.maxMinutes < driver2.timeWorked:
+                overworked = True
+
+            if not overworked and bestCost > cost:
+                bestCost = cost
+            
+            driver2.services.remove(service)
+            driver2.timeWorked -= service.duration
+            driver.services.add(service)
+            driver.timeWorked += service.duration
+        return isCompatible and initialCost > bestCost, initialCost - bestCost
 
     def printPerformance(self):
         if(not (self.enabledBuses or self.enabledDrivers)): return

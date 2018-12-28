@@ -31,11 +31,11 @@ class Solver(object):
             solution, elapsedEvalTime, evaluatedCandidates = self.greedyConstruction(config, problem)
         elif config.solver == 'GRASP':
             solution, elapsedEvalTime, evaluatedCandidates = self.GRASPConstruction(config, problem)
+        
         self.writeLogLine(solution.cost, 1)
 
         localSearch = LocalSearch(config)
         solution = localSearch.search(solution, self, problem)
-
         self.writeLogLine(solution.cost, 1)
         
         avg_evalTimePerCandidate = 0.0
@@ -47,7 +47,7 @@ class Solver(object):
         print ('  Num. Candidates Eval.', evaluatedCandidates)
         print ('  Total Eval. Time     ', elapsedEvalTime, 's')
         print ('  Avg. Time / Candidate', avg_evalTimePerCandidate, 'ms')
-        
+
         localSearch.printPerformance()
         
         return(solution)
@@ -91,7 +91,8 @@ class Solver(object):
             
             solution.assignDriver(driverUtilised, s)  
 
-        solution.cost = self.calculateFinalCost(problem)          
+        if solution.isFeasible():
+            solution.cost = self.calculateFinalCost(problem)          
         elapsedEvalTime = time.time() - elapsedEvalTime
         return(solution, elapsedEvalTime, evaluatedCandidates)
 

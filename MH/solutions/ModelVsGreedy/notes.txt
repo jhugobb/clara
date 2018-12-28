@@ -1,0 +1,1 @@
+El heuristics se puso a correr con Greedy, con local search en buses y drivers y con Reassignment best improvement
