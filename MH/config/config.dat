@@ -9,11 +9,11 @@ maxExecTime          = 600;                   # Maximum execution time in second
 
 # --- GRASP specific parameters -------------------------------------------------------------------------------
 # Ignored if solver is not GRASP.
-alpha                = 0.6;                   # Alpha parameter for the GRASP solver.
+alpha                = 0.5;                   # Alpha parameter for the GRASP solver.
 
 # --- Local Search specific parameters ------------------------------------------------------------------------
 # Ignored if solver is not Greedy or GRASP.
 localSearchBuses                = True;              # Enable local search for buses?
 localSearchDrivers              = True;              # Enable local search for drivers?
-neighborhoodStrategy = Reassignment;          # Supported Neighborhoods: Reassignment / Exchange
+neighborhoodStrategy = Exchange;          # Supported Neighborhoods: Reassignment / Exchange
 policy               = BestImprovement;       # Supported Policies: BestImprovement / FirstImprovement

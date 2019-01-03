@@ -8,7 +8,7 @@ from solver import Solver
 from solution import Solution
 
 def run():
-    #try:
+    try:
         argp = argparse.ArgumentParser(description='AMMM Lab Heuristics')
         argp.add_argument('configFile', help='configuration file path')
         args = argp.parse_args()
@@ -35,17 +35,17 @@ def run():
                 
             solution.saveToFile(config.solutionFile)
         else:
-            print ('Instance is infeasible.')
+            print ('Instance is unfeasible.')
             solution = Solution.createEmptySolution(config, problem)
             solution.makeInfeasible()
             solution.saveToFile(config.solutionFile)
             
         return(0)
-    # except Exception as e:
-    #     print ()
-    #     print ('Exception:', e)
-    #     print ()
-    #     return(1)   
+    except Exception as e:
+        print ()
+        print ('Exception:', e)
+        print ()
+        return(1)   
 
 
 if __name__ == '__main__':

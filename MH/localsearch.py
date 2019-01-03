@@ -41,8 +41,8 @@ class LocalSearch(object):
         drivers = problem.drivers
         neighbor = None
         neighbor2 = None
+        # Explore buses first and then drivers
         if self.nhStrategy == 'Exchange':
-
             if self.enabledBuses:
                 neighbor = self.exploreBusesEx(buses, solution, solver, problem)
             if self.enabledDrivers:
@@ -71,8 +71,7 @@ class LocalSearch(object):
         
         return neighbor
 
-            
-
+    # Explores the neighborhood of the solution via exchanging buses
     def exploreBusesEx(self, buses, solution, solver, problem):
         bestcost = 0
         bestBus1 = None
@@ -110,6 +109,7 @@ class LocalSearch(object):
             return(neighbor)
         else: return None
 
+    # Explores the neighborhood of the solution via exchanging drivers
     def exploreDriversEx(self, drivers, solution, solver, problem):
         bestcost = 0
         bestDriver1 = None
@@ -156,9 +156,8 @@ class LocalSearch(object):
             else:
                 driver.cost += problem.CBM * problem.BM + (driver.timeWorked - problem.BM) * problem.CEM
         return sorted(drivers, key = lambda driver: driver.cost, reverse = True)
-        #return sorted(buses, key = lambda bus: sum(map(lambda service: bus.costMin*service.duration+bus.costKm*service.distance, bus.services)), reverse=True)
 
-
+    # Tries to swap a service between the first bus and the second bus
     def tryChangeBus(self, bus, service, bus2):
         bestService = None
         cost = None
@@ -202,6 +201,7 @@ class LocalSearch(object):
                 bus.services.add(service)
         return bestService, initialCost - bestCost
 
+    # Tries to swap a service between the first driver and the second driver
     def tryChangeDriver(self, driver, service, driver2, problem):
         bestService = None
         cost = None
@@ -265,7 +265,7 @@ class LocalSearch(object):
 
         return bestService, initialCost - bestCost
 
-    
+    # Explores the neighborhood of the solution via reassigning buses
     def exploreBusesRe(self, buses, solution, solver, problem):
         bestcost = 0
         bestBus1 = None
@@ -309,7 +309,7 @@ class LocalSearch(object):
             return(neighbor)
         else: return None
 
-            
+    # Explores the neighborhood of the solution via reassigning drivers            
     def exploreDriversRe(self, drivers, solution, solver, problem):
         bestcost = 0
         bestDriver1 = None
@@ -332,20 +332,17 @@ class LocalSearch(object):
                             bestDriver1 = driver
                             bestDriver2 = driver2
                             bestService1 = service
-                            bestService2 = service2
                             bestcost = exchangeGain
-                    service2 = None
                     exchangeGain = 0
         if bestDriver1 is not None:
             neighbor = copy.deepcopy(solution)
-            neighbor.createNeighborDriver(bestDriver1, bestService1, bestDriver2, bestService2)
+            neighbor.createNeighborDriver(bestDriver1, bestService1, bestDriver2, None)
             currCost = solver.calculateFinalCost(problem)
             neighbor.cost = currCost
             return(neighbor)
         else: return None
     
-
-    
+    # Tries to reassign a service to bus2 and returns the difference in cost of the reassignement
     def tryReassignBus(self, bus, service, bus2, isUsed, nbrOfUsedBuses, problem):
         cost = None
         bestCost = sum(map(lambda ser: bus.costMin*ser.duration+bus.costKm*ser.distance, bus.services))
@@ -377,6 +374,7 @@ class LocalSearch(object):
             bus.services.add(service)
         return isCompatible and initialCost > bestCost, initialCost - bestCost
 
+    # Tries to reassign a service to driver2 and returns the difference in cost of the reassignement
     def tryReassignDriver(self, driver, service, driver2, problem):
         if driver.timeWorked <= problem.BM:
             initialCost =  driver.timeWorked * problem.CBM  

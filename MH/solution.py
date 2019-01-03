@@ -86,11 +86,11 @@ class Solution(Problem):
         
         strSolution = 'z = %10.8f;\n' % self.cost
         
-        # Xhk: decision variable containing the assignment of threads to cores
+
         # pre-fill with no assignments (all-zeros)
         xbs = []
-        for b in range(0, nBuses):         # h = 0..(nThreads-1)
-            xbsEntry = [0] * nServices     # results in a vector of 0's with nCores elements
+        for b in range(0, nBuses):        
+            xbsEntry = [0] * nServices 
             xbs.append(xbsEntry)
 
         xds = []

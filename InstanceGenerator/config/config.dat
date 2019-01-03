@@ -3,9 +3,9 @@ fileNamePrefix = project_data;
 fileNameExtension = dat;
 numInstances = 1;
 
-nServices = 400;
-nBuses = 410;
-nDrivers = 370;
+nServices = 1000;
+nBuses = 1500;
+nDrivers = 1600;
 
 minStartingTimeService = 0;
 maxStartingTimeService = 1440;
@@ -26,7 +26,7 @@ maxCostBusEurosKm = 4;
 minMaxMinutesDriver = 60;
 maxMaxMinutesDriver = 480;
 
-maxBuses = 341;
+maxBuses = 898;
 CBM = 10;
 CEM = 15;
 BM = 360;

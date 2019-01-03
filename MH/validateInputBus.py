@@ -33,7 +33,7 @@ class ValidateInputBus(object):
 			raise Exception('Size of startingTimeService(%d) does not match with the value of nServices(%d).' % (len(startingTimeService), nServices))
 		
 		for value in startingTimeService:
-			if(not isinstance(value, int) or value <= 0):
+			if(not isinstance(value, int) or value < 0):
 				raise Exception('Invalid parameter value(%s) in startingTimeService. Should be an integer greater or equal than zero.' % str(value))
 		
 		#Validate durationTimeService

@@ -56,19 +56,18 @@ class Solver(object):
         # get an empty solution for the problem
         solution = Solution.createEmptySolution(config, problem)
         
-        # get tasks and sort them by their total required resources in descending order
+        # get services and sort them ascending starting time order
         services = problem.services
         sortedServices = sorted(services, key=lambda service: service.startingTime, reverse=False)
         
         elapsedEvalTime = time.time()
         evaluatedCandidates = 0
         
-        # for each task taken in sorted order
         nBusesUtilised = 0
         busesUtilised = set()
 
+        # for each service in sorted order
         for s in sortedServices:
-            #costB = list()
 
             busUtilised, evalc = self.getBestBus(s, busesUtilised, problem, nBusesUtilised)
             evaluatedCandidates += evalc
@@ -100,7 +99,7 @@ class Solver(object):
         # get an empty solution for the problem
         solution = Solution.createEmptySolution(config, problem)
         
-        # get tasks and sort them by their total required resources in descending order
+        # get services and sort them by ascending starting time order
         services = problem.services
         sortedServices = sorted(services, key=lambda service: service.startingTime, reverse=False)
         
@@ -134,10 +133,12 @@ class Solver(object):
             
             solution.assignDriver(driverUtilised, s)  
 
-        solution.cost = self.calculateFinalCost(problem)          
+        if solution.isFeasible():
+            solution.cost = self.calculateFinalCost(problem)          
         elapsedEvalTime = time.time() - elapsedEvalTime
         return(solution, elapsedEvalTime, evaluatedCandidates)
 
+    # Iterates the buses in the problem in order to find the best one for the service being evaluated
     def getBestBus(self, service, busesUtilised, problem, nBusesUtilised):
         maxCost = float('infinity')
         busUtilised = None
@@ -166,6 +167,7 @@ class Solver(object):
             evaluatedCandidates+=1
         return (busUtilised, evaluatedCandidates)
 
+    # Iterates the drivers in the problem in order to find the best one for the service being evaluated
     def getBestDriver(self, service, problem):
         maxCost = float('infinity')
         driverUtilised = None
@@ -185,6 +187,7 @@ class Solver(object):
             evaluatedCandidates+=1
         return (driverUtilised, evaluatedCandidates)
 
+    # returns a list of the buses ordered by their associated cost of the service
     def getBestBusSet(self, service, busesUtilised, problem, nBusesUtilised):
         busSet = list()
         cost = float('infinity')
@@ -213,6 +216,7 @@ class Solver(object):
         sortedBuses = sorted(busSet, key=lambda bus: bus.costCurrService, reverse=False)
         return (sortedBuses, evaluatedCandidates)
 
+    # returns a list of the drivers ordered by their associated cost of the service
     def getBestDriverSet(self, service, problem):
         driverSet = list()
         evaluatedCandidates = 0
@@ -232,6 +236,7 @@ class Solver(object):
         sortedDrivers = sorted(driverSet, key=lambda driver: driver.costCurrService, reverse=False)
         return (sortedDrivers, evaluatedCandidates)
 
+    # Chooses the best bus out of costB out of an RCL
     def chooseBus(self, costB, alpha):
         if len(costB) == 0:
             return None
@@ -251,6 +256,7 @@ class Solver(object):
         else:
             return random.choice(candidates)
     
+    # Chooses the best driver out of costD out of an RCL
     def chooseDriver(self, costD, alpha):
         if len(costD) == 0:
             return None
@@ -270,6 +276,7 @@ class Solver(object):
         else:
             return random.choice(candidates)
 
+    # Calculates the final cost of the problem
     def calculateFinalCost(self, problem):
         cost = 0
         for b in problem.buses:
