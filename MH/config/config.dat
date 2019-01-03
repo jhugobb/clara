@@ -1,7 +1,7 @@
 # --- Common specific parameters ------------------------------------------------------------------------------
-inputDataFile        = data/project_data_500.dat;        # Input DAT file
-solutionFile         = solutions/ModelVsGreedy/data_500_Greedy.sol; # Output DAT file (solution)
-solver               = Greedy;                 # Supported solvers: Greedy / GRASP
+inputDataFile        = data/project_data_400.dat;        # Input DAT file
+solutionFile         = solutions/ModelVsGreedy/data_400_GRASP.sol; # Output DAT file (solution)
+solver               = GRASP;                 # Supported solvers: Greedy / GRASP
 maxExecTime          = 600;                   # Maximum execution time in seconds
 
 # --- Greedy specific parameters ------------------------------------------------------------------------------
@@ -13,7 +13,7 @@ alpha                = 0.5;                   # Alpha parameter for the GRASP so
 
 # --- Local Search specific parameters ------------------------------------------------------------------------
 # Ignored if solver is not Greedy or GRASP.
-localSearchBuses                = True;              # Enable local search for buses?
-localSearchDrivers              = True;              # Enable local search for drivers?
-neighborhoodStrategy = Exchange;          # Supported Neighborhoods: Reassignment / Exchange
-policy               = BestImprovement;       # Supported Policies: BestImprovement / FirstImprovement
+localSearchBuses                = False;              # Enable local search for buses?
+localSearchDrivers              = False;              # Enable local search for drivers?
+neighborhoodStrategy = Reassignment;          # Supported Neighborhoods: Reassignment / Exchange
+policy               = FirstImprovement;       # Supported Policies: BestImprovement / FirstImprovement
