@@ -1,0 +1,21 @@
+AMMM Project
+By Ivan Salfati and Hugo Ballesteros
+--------------------------------------
+Reading Config file config/config.dat...
+Reading Input Data file data/project_data_1000.dat...
+Creating Problem...
+Solving Problem...
+Elap. Time (s)   Obj. Value     Iterations
+    0.00000668          inf              0
+    2.11102366   2895244.70130000              1
+  984.55637288   2894527.42070000              1
+
+Greedy Candidate Evaluation Performance:
+  Num. Candidates Eval. 3100000
+  Total Eval. Time      2.104572296142578 s
+  Avg. Time / Candidate 0.000678894289078251 ms
+
+Local Search Performance:
+  Num. Iterations Eval. 86
+  Total Eval. Time      982.4441630840302 s
+  Avg. Time / Iteration 11423.769338186397 ms
